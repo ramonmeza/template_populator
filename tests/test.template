@@ -1,0 +1,23 @@
+// Copyright 2022 open-invaders
+// Author: Ramon Meza
+
+#ifndef ${Namespace}_${ClassName}_H_
+#define ${Namespace}_${ClassName}_H_
+
+#include <memory>
+
+namespace ${Namespace} {
+
+class ${ClassName} {
+ public:
+    ${ClassName}();
+    ~${ClassName}();
+
+ private:
+    class ${ClassName}Impl;
+    std::unique_ptr<${ClassName}Impl> impl_;
+};
+
+}  // namespace ${Namespace}
+
+#endif  // CORE_${ClassName}_H_
