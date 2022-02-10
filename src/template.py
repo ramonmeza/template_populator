@@ -22,20 +22,20 @@ class Template:
         self._file = None
 
     def __del__(self):
-        if self._template_file_is_open():
+        if self._file_is_open():
             self._file.close()
 
-    def _template_file_is_open(self) -> bool:
+    def _file_is_open(self) -> bool:
         return (self._file is not None and not self._file.closed)
 
     def load(self, path: str):
-        if self._template_file_is_open():
+        if self._file_is_open():
             self._file.close()
 
         self._file = open(path, 'r')
 
     def scan(self):
-        if not self._template_file_is_open():
+        if not self._file_is_open():
             msg = 'Not loaded template file, call load() first'
             raise FileNotFoundError(msg)
 
