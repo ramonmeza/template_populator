@@ -26,7 +26,7 @@ class Template:
             self._file.close()
 
     def _template_file_is_open(self) -> bool:
-        return not self._file and not self._file.closed
+        return self._file and not self._file.closed
 
     def load(self, path: str):
         if self._template_file_is_open():
