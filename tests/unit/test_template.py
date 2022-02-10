@@ -1,6 +1,7 @@
 import src.template
 
-TEST_FILE: str = '../data/test.template'
+
+TEST_FILE: str = 'tests/data/test.template'
 
 
 def test_template_file_is_open_negative():
