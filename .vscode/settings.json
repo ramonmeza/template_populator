@@ -1,12 +1,18 @@
 {
     "files.exclude": {
-        "**/.env": true,
+        "**/.env": false,
         "**/.pytest_cache": true,
         "**/__pycache__": true
     },
     "python.testing.pytestEnabled": true,
-    "python.testing.pytestArgs": [
-        "--import-mode=importlib"
+    "python.linting.flake8Enabled": true,
+    "python.linting.flake8Args": [
+        "--count",
+        "--select=E9,F63,F7,F82",
+        "--show-source",
+        "--statistics"
     ],
-    "python.linting.flake8Enabled": true
+    "python.testing.pytestArgs": [
+        "-v"
+    ]
 }

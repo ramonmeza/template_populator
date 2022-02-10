@@ -1,6 +1,14 @@
+import sys, pathlib
+
+# fix for pytest discovery (this is the worst thing *ever*)
+# this is used to work with VS Code's built in pytest tools
+root_dir: str = str(pathlib.Path(__file__).parent.parent.parent)
+if root_dir not in sys.path:
+    print('added to PATH')
+    sys.path.append(root_dir)
+
 import pytest
 import src.template
-
 
 TEST_FILE: str = 'tests/data/test.template'
 

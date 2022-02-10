@@ -7,11 +7,13 @@ import re
 
 class Template:
 
-    # token contains it's start and end positions in the file
+    # variables and types
     Token = namedtuple("Token", "line_num start end")
     _tokens: Dict[str, List[Token]]
     _token_pattern: str
     _file: io.TextIOWrapper
+
+    # constructors
 
     def __init__(self, token_pattern: str = '\\$\\{[a-zA-Z]*\\}') -> None:
         self._tokens = {
@@ -25,9 +27,9 @@ class Template:
         if self._file_is_open():
             self._file.close()
 
-    def _file_is_open(self) -> bool:
-        return (self._file is not None and not self._file.closed)
 
+    # public
+    
     def load(self, path: str):
         if self._file_is_open():
             self._file.close()
@@ -50,6 +52,11 @@ class Template:
             # add each token
             for token in tokens:
                 self._add_token(line_num, token)
+
+    # private
+
+    def _file_is_open(self) -> bool:
+        return (self._file is not None and not self._file.closed)
 
     def _scan_line(token_pattern: str, line: str) -> Iterator[Match]:
         return re.finditer(token_pattern, line)
