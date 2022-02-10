@@ -1,4 +1,5 @@
-import sys, pathlib
+import pathlib
+import sys
 
 # fix for pytest discovery (this is the worst thing *ever*)
 # this is used to work with VS Code's built in pytest tools
