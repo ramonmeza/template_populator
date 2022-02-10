@@ -20,4 +20,4 @@ class ${ClassName} {
 
 }  // namespace ${Namespace}
 
-#endif  // CORE_${ClassName}_H_
+#endif  // ${Namespace}_${ClassName}_H_

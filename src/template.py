@@ -1,5 +1,5 @@
 from collections import namedtuple
-from typing import Dict, List, Match
+from typing import Dict, Iterator, List, Match
 
 import io
 import re
@@ -8,7 +8,7 @@ import re
 class Template:
 
     # token contains it's start and end positions in the file
-    Token = namedtuple("Token", "start end")
+    Token = namedtuple("Token", "line_num start end")
     _tokens: Dict[str, List[Token]]
     _token_pattern: str
     _file: io.TextIOWrapper
@@ -39,18 +39,24 @@ class Template:
             msg = 'Not loaded template file, call load() first'
             raise FileNotFoundError(msg)
 
+        line_num: int = 0
         for line in self._file:
-            tokens = self.scan_line(line, self._token_pattern)
+            # increment line number
+            line_num += 1
 
+            # get the token
+            tokens = Template._scan_line(self._token_pattern, line)
+
+            # add each token
             for token in tokens:
-                self.add_token(token)
+                self._add_token(line_num, token)
 
-    def scan_line(line: str, token_pattern: str):
-        return re.finditer(token_pattern)
+    def _scan_line(token_pattern: str, line: str) -> Iterator[Match]:
+        return re.finditer(token_pattern, line)
 
-    def add_token(self, match: Match):
+    def _add_token(self, line_num: int, match: Match):
         key = match.group(0)
-        token = Template.Token(match.start(), match.end())
+        token = Template.Token(line_num, match.start(), match.end())
 
         # create the list for the key
         if key not in self._tokens:

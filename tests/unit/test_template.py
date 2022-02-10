@@ -28,10 +28,10 @@ def test_load(resource: src.template.Template):
         assert test_stat == expected_stat
 
 
-def test_file_is_open_negative(resource: src.template.Template):
-    assert resource._file_is_open() is False
-
-
-def test_file_is_open_positive(resource: src.template.Template):
+def test_scan(resource: src.template.Template):
     resource.load(TEST_FILE)
-    assert resource._file_is_open() is True
+    resource.scan()
+    assert "${Namespace}" in resource._tokens
+    assert "${ClassName}" in resource._tokens
+    assert len(resource._tokens["${Namespace}"]) == 5
+    assert len(resource._tokens["${ClassName}"]) == 8
