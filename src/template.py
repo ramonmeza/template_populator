@@ -65,6 +65,14 @@ class Template:
         self._file.seek(0)
         rendered.seek(0)
         return rendered
+    
+    def export(self, path: str):
+        with open(path, 'w') as file:
+            rendered = self.render()
+            file.write(rendered.read())
+
+    def get_keys(self):
+        return self._tokens.keys()
 
     # private
 
@@ -81,11 +89,18 @@ class Template:
         if key not in self._tokens:
             self._tokens[key] = ''
 
+
 if __name__ == '__main__':
     resource = Template()
-    resource.load('tests/data/test.template')
+    
+    resource.load(input('load template file (absolute path): '))
+    
+    print('scanning...')
     resource.scan()
-    resource.replace('${Namespace}', 'test_namespace')
-    resource.replace('${ClassName}', 'TestClass')
 
-    print(resource.render())
+    print('provide replacement: ')
+    for key in resource.get_keys():
+        resource.replace(key, input(f'replace {key} with: '))
+
+    resource.export(input('export to (absolute path (incl. filename and ext): '))
+    print('finished')
