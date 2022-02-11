@@ -48,8 +48,8 @@ def test_scan(resource: src.template.Template):
     assert "${ClassName}" in resource._tokens
     assert resource._tokens["${ClassName}"] == ''
 
-# ensure the Template.replace modified each token's
-# replacement attribute
+# ensure that Template.replace() modifies each
+# token's replacement attribute
 @pytest.mark.parametrize(
     "key,replacement", [
         ('${Namespace}', 'test_namespace'),
@@ -62,6 +62,8 @@ def test_replace(resource: src.template.Template, key: str, replacement: str):
 
     assert resource._tokens[key] == replacement
 
+# ensure that Template.render() produces the same
+# output as our expected test template file when read
 def test_render(resource: src.template.Template):
     resource.load(TEST_FILE)
     resource.scan()
