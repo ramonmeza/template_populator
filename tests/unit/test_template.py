@@ -1,3 +1,4 @@
+import os
 import pathlib
 import sys
 
@@ -29,7 +30,6 @@ def resource():
 # ensure the the file opened through Template.load()
 # is the same as a file we open manually
 def test_load(resource: src.template.Template):
-    import os
     with open(TEST_FILE, 'r') as file:
         expected_stat = os.fstat(file.fileno())
         resource.load(TEST_FILE)
@@ -60,5 +60,14 @@ def test_replace(resource: src.template.Template, key: str, replacement: str):
     resource.scan()
     resource.replace(key, replacement)
 
-    for token in resource._tokens[key]:
-        assert token.replacement == replacement
+    assert resource._tokens[key] == replacement
+
+def test_render(resource: src.template.Template):
+    resource.load(TEST_FILE)
+    resource.scan()
+    resource.replace('${Namespace}', 'test_namespace')
+    resource.replace('${ClassName}', 'TestClass')
+
+    with open(TEST_EXPECTED_FILE, 'r') as file:
+        result = resource.render()
+        assert result.read() == file.read()

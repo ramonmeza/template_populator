@@ -14,10 +14,7 @@ class Template:
     # constructors
 
     def __init__(self, token_pattern: str = '\\$\\{[a-zA-Z]*\\}') -> None:
-        self._tokens = {
-            "${Global}": []
-        }
-
+        self._tokens = {}
         self._token_pattern = token_pattern
         self._file = None
 
@@ -47,22 +44,26 @@ class Template:
             # add each token
             for token in tokens:
                 self._add_token(token)
+        self._file.seek(0)
 
     def replace(self, key: str, replacement: str) -> None:
-        if key in self._tokens:
-            for token in self._tokens[key]:
-                token = replacement
+        if key in self._tokens.keys():
+            self._tokens[key] = replacement
 
     def render(self) -> io.StringIO:
-        rendered: io.StringIO = ''
+        rendered: io.StringIO = io.StringIO()
 
         self._file.seek(0)
         for line in self._file:
             tmp: str = line
 
-            for key in self._tokens.keys:
+            for key in self._tokens.keys():
                 tmp = tmp.replace(key, self._tokens[key])
 
+            rendered.write(tmp)
+
+        self._file.seek(0)
+        rendered.seek(0)
         return rendered
 
     # private
@@ -79,3 +80,12 @@ class Template:
         # create the list for the key
         if key not in self._tokens:
             self._tokens[key] = ''
+
+if __name__ == '__main__':
+    resource = Template()
+    resource.load('tests/data/test.template')
+    resource.scan()
+    resource.replace('${Namespace}', 'test_namespace')
+    resource.replace('${ClassName}', 'TestClass')
+
+    print(resource.render())
