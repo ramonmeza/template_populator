@@ -65,9 +65,9 @@ class Template:
         self._file.seek(0)
         rendered.seek(0)
         return rendered
-    
+
     def export(self, path: str):
-        with open(path, 'w') as file:
+        with open(path, 'w+') as file:
             rendered = self.render()
             file.write(rendered.read())
 
@@ -91,16 +91,60 @@ class Template:
 
 
 if __name__ == '__main__':
+    import argparse
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        '-t',
+        '--template_file',
+        dest='template_file',
+        required=False,
+        help='path to the template file')
+    parser.add_argument(
+        '-o',
+        '--output',
+        dest='output_file',
+        required=False,
+        help='path to the output file')
+    parser.add_argument(
+        '-r',
+        '--replace',
+        dest='replacements',
+        action='append',
+        nargs='+',
+        required=False,
+        help='replace a token in your template, ' +
+             'use format: -r ${token}:value_to_replace_with')
+    args = parser.parse_args()
+
     resource = Template()
-    
-    resource.load(input('load template file (absolute path): '))
-    
+
+    # load template file
+    if not args.template_file:
+        args.template_file = input('load template file (absolute path): ')
+
+    resource.load(args.template_file)
+
+    # scan
     print('scanning...')
     resource.scan()
 
-    print('provide replacement: ')
-    for key in resource.get_keys():
-        resource.replace(key, input(f'replace {key} with: '))
+    # get replacements by either the arguments or by explicitly asking the user
+    if args.replacements is not None:
+        print(args.replacements)
+        for replacement in args.replacements:
+            key, value = map(str, replacement[0].split(':'))
+            resource.replace(key, value)
+    else:
+        print('provide replacements: ')
+        for key in resource.get_keys():
+            resource.replace(key, input(f'replace {key} with: '))
 
-    resource.export(input('export to (absolute path (incl. filename and ext): '))
+    # export the file
+    if not args.output_file:
+        args.output_file = \
+            input('export to (absolute path (incl. filename and ext): ')
+
+    resource.export(args.output_file)
+
     print('finished')
