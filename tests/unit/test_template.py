@@ -29,10 +29,8 @@ def resource():
 
 def test_load(resource: Template):
     with open(TEST_FILE, 'r') as file:
-        expected_stat = os.fstat(file.fileno())
         resource.load(TEST_FILE)
-        test_stat = os.fstat(resource._file.fileno())
-        assert test_stat == expected_stat
+        assert resource._file.read() == file.read()
 
     assert 'test_case_name' in resource._tokens
     assert resource._tokens['test_case_name'] == ''
