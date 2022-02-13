@@ -10,7 +10,7 @@ if root_dir not in sys.path:
     sys.path.append(root_dir)
 
 import pytest
-import src.template
+from src.template import Template
 
 TEST_FILE: str = 'tests/data/test.template'
 TEST_EXPECTED_FILE: str = 'tests/data/test_expected.template'
@@ -19,7 +19,7 @@ TEST_EXPECTED_FILE: str = 'tests/data/test_expected.template'
 @pytest.fixture()
 def resource():
     # setup test
-    test = src.template.Template()
+    test = Template()
 
     # perform test
     yield test
@@ -27,48 +27,36 @@ def resource():
     # teardown test
     return
 
-# ensure the the file opened through Template.load()
-# is the same as a file we open manually
-def test_load(resource: src.template.Template):
+def test_load(resource: Template):
     with open(TEST_FILE, 'r') as file:
         expected_stat = os.fstat(file.fileno())
         resource.load(TEST_FILE)
         test_stat = os.fstat(resource._file.fileno())
         assert test_stat == expected_stat
 
-# ensure that Template.scan() takes the loaded file,
-# scans it for tokens encapsulated with ${}, and adds
-# the tokens to it's internal map of tokens.
-def test_scan(resource: src.template.Template):
-    resource.load(TEST_FILE)
-    resource.scan()
+    assert 'test_case_name' in resource._tokens
+    assert resource._tokens['test_case_name'] == ''
+    assert 'test_key_a' in resource._tokens
+    assert resource._tokens['test_key_a'] == ''
 
-    assert "${Namespace}" in resource._tokens
-    assert resource._tokens["${Namespace}"] == ''
-    assert "${ClassName}" in resource._tokens
-    assert resource._tokens["${ClassName}"] == ''
-
-# ensure that Template.replace() modifies each
-# token's replacement attribute
 @pytest.mark.parametrize(
-    "key,replacement", [
-        ('${Namespace}', 'test_namespace'),
-        ('${ClassName}', 'TestClass')
+    'key,replacement', [
+        ('test_case_name', 'A'),
+        ('test_key_a', 'kEy')
 ])
-def test_replace(resource: src.template.Template, key: str, replacement: str):
+def test_replace(resource: Template, key: str, replacement: str):
     resource.load(TEST_FILE)
-    resource.scan()
     resource.replace(key, replacement)
 
     assert resource._tokens[key] == replacement
 
-# ensure that Template.render() produces the same
-# output as our expected test template file when read
-def test_render(resource: src.template.Template):
+# ensure that TemplateApi.render() produces the same
+# output as our expected test TemplateApi file when read
+def test_render(resource: Template):
     resource.load(TEST_FILE)
-    resource.scan()
-    resource.replace('${Namespace}', 'test_namespace')
-    resource.replace('${ClassName}', 'TestClass')
+    
+    resource.replace('test_case_name', 'A')
+    resource.replace('test_key_a', 'kEy')
 
     with open(TEST_EXPECTED_FILE, 'r') as file:
         result = resource.render()

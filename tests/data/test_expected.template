@@ -1,23 +1,4 @@
-// Copyright 2022 open-invaders
-// Author: Ramon Meza
-
-#ifndef test_namespace_TestClass_H_
-#define test_namespace_TestClass_H_
-
-#include <memory>
-
-namespace test_namespace {
-
-class TestClass {
- public:
-    TestClass();
-    ~TestClass();
-
- private:
-    class TestClassImpl;
-    std::unique_ptr<TestClassImpl> impl_;
-};
-
-}  // namespace test_namespace
-
-#endif  // test_namespace_TestClass_H_
+Test Key A: kEy
+Test Key A: key
+Test Key A: KEY
+Test Key A: Key

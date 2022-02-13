@@ -1,23 +1,4 @@
-// Copyright 2022 open-invaders
-// Author: Ramon Meza
-
-#ifndef ${Namespace}_${ClassName}_H_
-#define ${Namespace}_${ClassName}_H_
-
-#include <memory>
-
-namespace ${Namespace} {
-
-class ${ClassName} {
- public:
-    ${ClassName}();
-    ~${ClassName}();
-
- private:
-    class ${ClassName}Impl;
-    std::unique_ptr<${ClassName}Impl> impl_;
-};
-
-}  // namespace ${Namespace}
-
-#endif  // ${Namespace}_${ClassName}_H_
+Test Key ${test_case_name:upper}: ${test_key_a}
+Test Key ${test_case_name:upper}: ${test_key_a:lower}
+Test Key ${test_case_name:upper}: ${test_key_a:upper}
+Test Key ${test_case_name:upper}: ${test_key_a:capitalize}

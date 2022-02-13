@@ -1,150 +1,96 @@
-from collections import namedtuple
-from typing import Dict, Iterator, List, Match
-
 import io
 import re
 
 class Template:
 
-    # variables and types
-    _tokens: Dict[str, str]
-    _token_pattern: str
+    TOKEN_REGEX_PATTERN: str = '\$\{([a-zA-Z_]*):?([a-zA-Z_]*)\}'
+
     _file: io.TextIOWrapper
+    _tokens: dict
 
-    # constructors
-
-    def __init__(self, token_pattern: str = '\\$\\{[a-zA-Z]*\\}') -> None:
-        self._tokens = {}
-        self._token_pattern = token_pattern
+    def __init__(self) -> None:
         self._file = None
+        self._tokens = {}
 
-    def __del__(self):
-        if self._file_is_open():
+    def __del__(self) -> None:
+        # close the file if it's loaded and open
+        if self.is_loaded():
             self._file.close()
 
-    # public
+    def load(self, path: str) -> bool:
+        try:
+            self._file = open(path, 'r')
+            self._scan()
+            return True
+
+        except Exception as e:
+            print(repr(e))
+
+        return False
+
+    def _scan(self) -> None:
+        if not self.is_loaded():
+            return
+        
+        self._file.seek(0)
+        for line in self._file:
+            matches = re.finditer(Template.TOKEN_REGEX_PATTERN, line)
+
+            # add each token with an empty replacement
+            for match in matches:
+                key = match.group(1)
+                self._tokens[key] = ''
+
+        self._file.seek(0)
     
-    def load(self, path: str) -> None:
-        if self._file_is_open():
-            self._file.close()
-
-        self._file = open(path, 'r')
-        self._file.seek(0)
-
-    def scan(self) -> None:
-        if not self._file_is_open():
-            msg = 'Not loaded template file, call load() first'
-            raise FileNotFoundError(msg)
-
-        self._file.seek(0)
-        for line in self._file:
-            # get the token
-            tokens = Template._scan_line(self._token_pattern, line)
-
-            # add each token
-            for token in tokens:
-                self._add_token(token)
-        self._file.seek(0)
-
-    def replace(self, key: str, replacement: str) -> None:
-        if key in self._tokens.keys():
-            self._tokens[key] = replacement
-
     def render(self) -> io.StringIO:
-        rendered: io.StringIO = io.StringIO()
+        if not self.is_loaded():
+            return None
 
         self._file.seek(0)
+        rendered = io.StringIO()
         for line in self._file:
-            tmp: str = line
+            rendered_line = line
 
-            for key in self._tokens.keys():
-                tmp = tmp.replace(key, self._tokens[key])
+            matches = re.finditer(Template.TOKEN_REGEX_PATTERN, rendered_line)
 
-            rendered.write(tmp)
+            for match in matches:
+                replace_me: str = match.group(0)
+                key: str = match.group(1)
+                replacement: str = self._tokens[key]
 
+                if len(match.groups()) > 1:
+                    try:
+                        modifier: str = getattr(replacement, match.group(2))
+                        replacement = modifier()
+                    except Exception as e:
+                        print(f'Modifier exception: {match.group(2)}')
+                        print(repr(e))
+
+                rendered_line = rendered_line.replace(replace_me, replacement)
+
+            rendered.write(rendered_line)
+        
         self._file.seek(0)
         rendered.seek(0)
+
         return rendered
+    
+    def replace(self, key: str, replacement: str) -> bool:
+        if key in self._tokens.keys():
+            self._tokens[key] = replacement
+            return True
 
-    def export(self, path: str):
-        with open(path, 'w+') as file:
-            rendered = self.render()
-            file.write(rendered.read())
+        print(f'Key not found in template: {key}')
+        return False
 
-    def get_keys(self):
-        return self._tokens.keys()
+    def is_loaded(self):
+        # if the file isn't loaded
+        if not self._file or self._file.closed:
+            print('No template loaded!')
+            return False
 
-    # private
-
-    def _file_is_open(self) -> bool:
-        return (self._file is not None and not self._file.closed)
-
-    def _scan_line(token_pattern: str, line: str) -> Iterator[Match]:
-        return re.finditer(token_pattern, line)
-
-    def _add_token(self, match: Match):
-        key = match.group(0)
-
-        # create the list for the key
-        if key not in self._tokens:
-            self._tokens[key] = ''
-
+        return True
 
 if __name__ == '__main__':
-    import argparse
-
-    parser = argparse.ArgumentParser()
-    parser.add_argument(
-        '-t',
-        '--template_file',
-        dest='template_file',
-        required=False,
-        help='path to the template file')
-    parser.add_argument(
-        '-o',
-        '--output',
-        dest='output_file',
-        required=False,
-        help='path to the output file')
-    parser.add_argument(
-        '-r',
-        '--replace',
-        dest='replacements',
-        action='append',
-        nargs='+',
-        required=False,
-        help='replace a token in your template, ' +
-             'use format: -r ${token}:value_to_replace_with')
-    args = parser.parse_args()
-
-    resource = Template()
-
-    # load template file
-    if not args.template_file:
-        args.template_file = input('load template file (absolute path): ')
-
-    resource.load(args.template_file)
-
-    # scan
-    print('scanning...')
-    resource.scan()
-
-    # get replacements by either the arguments or by explicitly asking the user
-    if args.replacements is not None:
-        print(args.replacements)
-        for replacement in args.replacements:
-            key, value = map(str, replacement[0].split(':'))
-            resource.replace(key, value)
-    else:
-        print('provide replacements: ')
-        for key in resource.get_keys():
-            resource.replace(key, input(f'replace {key} with: '))
-
-    # export the file
-    if not args.output_file:
-        args.output_file = \
-            input('export to (absolute path (incl. filename and ext): ')
-
-    resource.export(args.output_file)
-
-    print('finished')
+    obj = Template()

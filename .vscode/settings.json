@@ -6,7 +6,7 @@
     },
     "python.testing.pytestEnabled": true,
     "python.testing.pytestArgs": [
-        "-v"
+        "-vv"
     ],
     
     "python.linting.enabled": true,
