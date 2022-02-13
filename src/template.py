@@ -1,3 +1,4 @@
+from ast import arg
 import io
 import re
 
@@ -93,4 +94,38 @@ class Template:
         return True
 
 if __name__ == '__main__':
-    obj = Template()
+    import argparse
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        '-t',
+        '--template_file',
+        dest='template_file',
+        required=False,
+        help='path to the template file')
+    parser.add_argument(
+        '-o',
+        '--output',
+        dest='output_file',
+        required=False,
+        help='path to the output file')
+    parser.add_argument(
+        '-r',
+        '--replace',
+        dest='replacements',
+        action='append',
+        nargs='+',
+        required=False,
+        help='replace a token in your template, ' +
+             'use format: -r key:value_to_replace_with')
+    args = parser.parse_args()
+
+    template = Template()
+    template.load(args.template_file)
+
+    for replacement in args.replacements:
+        key, value = map(str, replacement[0].split(':'))
+        template.replace(key, value)
+    
+    with open(args.output_file, 'w+') as file:
+        file.write(template.render())
