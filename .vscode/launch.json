@@ -1,0 +1,39 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Create Example Template",
+            "type": "python",
+            "request": "launch",
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}",
+            "program": "src/template.py",
+            "args": [
+                "-t", "tests/data/test.template",
+                "-r", "test_case_name:${input:test_case_name}",
+                "-r", "test_key:${input:test_key}",
+                "-o", "${input:output}.example"
+            ]
+        }
+    ],
+    "inputs": [
+        {
+            "id": "test_case_name",
+            "description": "Test Case Name: ",
+            "type": "promptString"
+        },
+        {
+            "id": "test_key",
+            "description": "Test Key: ",
+            "type": "promptString"
+        },
+        {
+            "id": "output",
+            "description": "Output filename (no extension): ",
+            "type": "promptString"
+        }
+    ]
+}

@@ -60,13 +60,11 @@ class Template:
                 key: str = match.group(1)
                 replacement: str = self._tokens[key]
 
-                if len(match.groups()) > 1:
-                    try:
-                        modifier: str = getattr(replacement, match.group(2))
-                        replacement = modifier()
-                    except Exception as e:
-                        print(f'Modifier exception: {match.group(2)}')
-                        print(repr(e))
+                try:
+                    modifier: str = getattr(replacement, match.group(2))
+                    replacement = modifier()
+                except Exception as e:
+                    pass
 
                 rendered_line = rendered_line.replace(replace_me, replacement)
 
@@ -128,4 +126,4 @@ if __name__ == '__main__':
         template.replace(key, value)
     
     with open(args.output_file, 'w+') as file:
-        file.write(template.render())
+        file.write(template.render().getvalue())

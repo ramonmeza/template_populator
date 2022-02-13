@@ -34,13 +34,13 @@ def test_load(resource: Template):
 
     assert 'test_case_name' in resource._tokens
     assert resource._tokens['test_case_name'] == ''
-    assert 'test_key_a' in resource._tokens
-    assert resource._tokens['test_key_a'] == ''
+    assert 'test_key' in resource._tokens
+    assert resource._tokens['test_key'] == ''
 
 @pytest.mark.parametrize(
     'key,replacement', [
         ('test_case_name', 'A'),
-        ('test_key_a', 'kEy')
+        ('test_key', 'kEy')
 ])
 def test_replace(resource: Template, key: str, replacement: str):
     resource.load(TEST_FILE)
@@ -54,7 +54,7 @@ def test_render(resource: Template):
     resource.load(TEST_FILE)
     
     resource.replace('test_case_name', 'A')
-    resource.replace('test_key_a', 'kEy')
+    resource.replace('test_key', 'kEy')
 
     with open(TEST_EXPECTED_FILE, 'r') as file:
         result = resource.render()
